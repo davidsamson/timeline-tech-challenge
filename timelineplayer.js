@@ -17,6 +17,8 @@ TimelinePlayer.prototype.notifyObserver = function(callback,data) {
     }
 };
 
+// note - I'm assuming that the data in the file is valid (correctly formatted)
+// and the events are in order by age and don't need sorting.
 TimelinePlayer.prototype.load = function(path) {
     var _this = this;
     var promise = $.getJSON(path);
