@@ -3,12 +3,10 @@ var TimelinePlayer = function (timePerYearMS, observer) {
     this.observer = observer;
 
     this.data = null;
-    this.pauseTime = 0;
+    this.timer = null;
+    this.pauseTime = null;
     this.eventIndex = 0;
-    this.currentYear = 0;
-    this.timer = -1;
     this.startTime = 0;
-    this.pauseTime = -1;
     this.timeForCurrentEvent = 0;
     this.elapsedTime = 0;
 };
@@ -31,6 +29,7 @@ TimelinePlayer.prototype.load = function(path) {
 };
 
 TimelinePlayer.prototype.play = function() {
+
     // check for no data loaded
     if ( this.data === null ) {
         return;
@@ -39,55 +38,60 @@ TimelinePlayer.prototype.play = function() {
     this.notifyObserver("playing");
 
     // check for currently paused
-    if ( this.pauseTime === -1 ) {
+    var _this = this;
+    if ( this.pauseTime === null ) {
 
-        // check for playing event
-        if ( this.currentYear == this.data.events[this.eventIndex]["age"] ) {
-            var text = "At age "+this.data.events[this.eventIndex]["age"]+", "+this.data["firstName"]+" "+this.data.events[this.eventIndex]["content"]+".";
+        // create text for display
+        var text = "At age "+this.data.events[this.eventIndex]["age"]+", "+this.data["firstName"]+" "+this.data.events[this.eventIndex]["content"]+".";
 
-            this.notifyObserver("displayEvent",{index:this.eventIndex,text:text});
+        this.notifyObserver("displayEvent", { index:this.eventIndex, text:text });
 
-            this.elapsedTime = 0;
-            this.startTime = performance.now();
-            this.eventIndex++;
-            if ( this.eventIndex >= this.data.events.length ) {
-                this.notifyObserver("complete");
-                return;
-            }
-            this.timeForCurrentEvent = (this.data.events[this.eventIndex]["age"] - this.data.events[this.eventIndex-1]["age"]) * this.timePerYearMS;
+        // check for completed all events
+        if ( ++this.eventIndex >= this.data.events.length ) {
+            this.notifyObserver("complete");
+            return;
         }
 
-        var _this = this;
-        if ( this.pauseTime === -1 ) {
-            this.timer = setTimeout(function() { _this.play(); }, this.timePerYearMS);
-            this.currentYear++;
+        // reset time counters
+        this.elapsedTime = 0;
+        this.startTime = performance.now();
+
+        // calculate total time for this event
+        this.timeForCurrentEvent = (this.data.events[this.eventIndex]["age"] - this.data.events[this.eventIndex-1]["age"]) * this.timePerYearMS;
+
+        // if not paused, set timer to play next event
+        // (a pause could occur in the notifyObserver call above - as in testing)
+        if ( this.pauseTime === null ) {
+            this.timer = setTimeout(function() { _this.play(); }, this.timeForCurrentEvent);
         }
 
-    } else { // resume
-        var dt = this.timeForCurrentEvent - this.elapsedTime - (this.pauseTime - this.startTime);
+    } else {
+
+        // resume playback
+        var remainingTime = this.timeForCurrentEvent - this.elapsedTime - (this.pauseTime - this.startTime);
         this.elapsedTime += (this.pauseTime - this.startTime);
         this.startTime = performance.now();
-        this.pauseTime = -1;
-        this.timer = setTimeout(this.play(), dt);
+        this.pauseTime = null;
+        this.timer = setTimeout(function() { _this.play(); }, remainingTime);
 
     }
 };
 
 TimelinePlayer.prototype.pause = function() {
-    this.notifyObserver("paused");
     this.pauseTime = performance.now();
-    if ( this.timer !== -1 ) {
+    if ( this.timer !== null ) {
         clearTimeout(this.timer);
-        this.timer = -1;
+        this.timer = null;
     }
+    this.notifyObserver("paused");
 };
 
 TimelinePlayer.prototype.reset = function() {
     this.eventIndex = 0;
-    this.currentYear = 0;
-    this.pauseTime = -1;
+    this.pauseTime = null;
     if ( this.timer ) {
         clearTimeout(this.timer);
-        this.timer = -1;
+        this.timer = null;
     }
+    this.notifyObserver("reset");
 };

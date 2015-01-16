@@ -78,7 +78,7 @@ describe("timeline player", function () {
                 done();
             },
             paused: function() {
-                expect(true).toBe(true);
+                expect(timelinePlayer.timer).toBeNull();
                 done();
             }
         };
@@ -98,6 +98,31 @@ describe("timeline player", function () {
             },
             complete: function() {
                 expect(true).toBe(true);
+                done();
+            }
+        };
+
+        timelinePlayer.timePerYearMS = 10;
+        timelinePlayer.load('timeline.json');
+    });
+
+    it ("notifies the observer when reset", function(done) {
+
+        timelinePlayer.observer = {
+            loadSucceed: function() {
+                timelinePlayer.play();
+            },
+            loadFail: function() {
+                fail();
+                done();
+            },
+            complete: function() {
+                timelinePlayer.reset();
+            },
+            reset: function() {
+                expect(timelinePlayer.eventIndex).toBe(0);
+                expect(timelinePlayer.pauseTime).toBeNull();
+                expect(timelinePlayer.timer).toBeNull();
                 done();
             }
         };
@@ -174,7 +199,7 @@ describe("timeline player", function () {
             },
             complete: function() {
                 var d = new Date();
-                var endTime = d.getTime() - startTime - 500;
+                var endTime = d.getTime() - startTime - 500; // subtract time paused
                 expect(Math.floor(endTime/100)).toEqual(timelinePlayer.data.events[timelinePlayer.data.events.length-1]["age"]);
                 done();
             }
