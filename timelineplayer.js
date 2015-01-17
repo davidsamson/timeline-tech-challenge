@@ -25,8 +25,11 @@ var TimelinePlayer = function (timePerYearMS, observer) {
  * I have decided to use an observer pattern to receive
  * events from this object.  I considered using a pub/sub, but this
  * was easier given the time constraints.
+ *
+ * @param callback - the string name of the callback method
+ * @param data - any data being used as the argument for the callback.
  */
-TimelinePlayer.prototype.notifyObserver = function(callback,data) {
+TimelinePlayer.prototype.notifyObserver = function(callback, data) {
     if ( this.observer && this.observer.hasOwnProperty(callback) ) {
         this.observer[callback](data);
     }
