@@ -1,3 +1,10 @@
+/**
+ * Timeline Player
+ * David Scott Samson
+ *
+ * @param timePerYearMS - this contains the duration of each year on the timeline
+ * @param observer - this is the object that receives the event callbacks
+ */
 var TimelinePlayer = function (timePerYearMS, observer) {
     this.timePerYearMS = timePerYearMS;
     this.observer = observer;
@@ -11,14 +18,27 @@ var TimelinePlayer = function (timePerYearMS, observer) {
     this.elapsedTime = 0;
 };
 
+/**
+ * notifyObserver - this method sends callbacks to the observer
+ * if present.
+ *
+ * I have decided to use an observer pattern to receive
+ * events from this object.  I considered using a pub/sub, but this
+ * was easier given the time constraints.
+ */
 TimelinePlayer.prototype.notifyObserver = function(callback,data) {
     if ( this.observer && this.observer.hasOwnProperty(callback) ) {
         this.observer[callback](data);
     }
 };
 
-// note - I'm assuming that the data in the file is valid (correctly formatted)
-// and the events are in order by age and don't need sorting.
+/**
+ * load - this method loads the data file from a JSON file
+ * @param path
+ *
+ * I'm assuming that the data in the file is valid (correctly formatted)
+ * and the events are in order by age and don't need sorting.
+ */
 TimelinePlayer.prototype.load = function(path) {
     var _this = this;
     var promise = $.getJSON(path);
@@ -30,6 +50,10 @@ TimelinePlayer.prototype.load = function(path) {
     });
 };
 
+/**
+ * play - this method plays the next event in the data
+ *
+ */
 TimelinePlayer.prototype.play = function() {
 
     // check for no data loaded
