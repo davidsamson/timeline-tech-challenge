@@ -51,8 +51,11 @@ TimelinePlayer.prototype.load = function(path) {
 };
 
 /**
- * play - this method plays the next event in the data
+ * play - this method plays/resumes displaying the next event in the data
  *
+ * The method calculates how long each event will be displayed and uses a timer
+ * to trigger the display of the next event.  Also, if the playback is paused,
+ * this method will resume playing from the time it left off.
  */
 TimelinePlayer.prototype.play = function() {
 
@@ -103,6 +106,14 @@ TimelinePlayer.prototype.play = function() {
     }
 };
 
+/**
+ * pause - this method will pause the playback
+ *
+ * Essentially this means killing the timer and
+ * capturing the time the pause occurred.  The
+ * observer is notified.
+ *
+ */
 TimelinePlayer.prototype.pause = function() {
     this.pauseTime = performance.now();
     if ( this.timer !== null ) {
@@ -112,6 +123,12 @@ TimelinePlayer.prototype.pause = function() {
     this.notifyObserver("paused");
 };
 
+/**
+ * reset - this method will reset the playback
+ *
+ * The method kills the timer if running, clears some
+ * variables, and notifies the observer.
+ */
 TimelinePlayer.prototype.reset = function() {
     this.eventIndex = 0;
     this.pauseTime = null;
