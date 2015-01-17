@@ -117,7 +117,6 @@ TimelinePlayer.prototype.play = function() {
  * Essentially this means killing the timer and
  * capturing the time the pause occurred.  The
  * observer is notified.
- *
  */
 TimelinePlayer.prototype.pause = function() {
     this.pauseTime = performance.now();
