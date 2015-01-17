@@ -1,8 +1,15 @@
+
+// I'm stubbing the performance counter to use getTime() for tests.
 var performance = {
     now: function() { var d=new Date(); return d.getTime(); }
 };
 
-
+/*
+    I'm going to recreate the player for each test and load the
+    data when needed for the test.  I'm aware that I could inject
+    test data here instead, given the time constraints, I decided
+    to go with the file data.
+ */
 describe("timeline player", function () {
 
     var timelinePlayer;
