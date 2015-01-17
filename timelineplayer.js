@@ -41,6 +41,8 @@ TimelinePlayer.prototype.notifyObserver = function(callback, data) {
  *
  * I'm assuming that the data in the file is valid (correctly formatted)
  * and the events are in order by age and don't need sorting.
+ * I considered moving the loading of the data out of this class, but
+ * for simplicity I'm leaving it in.
  */
 TimelinePlayer.prototype.load = function(path) {
     var _this = this;
