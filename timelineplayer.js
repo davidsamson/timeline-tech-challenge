@@ -45,14 +45,16 @@ TimelinePlayer.prototype.notifyObserver = function(callback, data) {
  * for simplicity I'm leaving it in.
  */
 TimelinePlayer.prototype.load = function(path) {
-    var _this = this;
-    var promise = $.getJSON(path);
-    promise.then(function(data) {
-        _this.data = data;
-        _this.notifyObserver("loadSucceed", data);
-    }, function(jqxhr, textStatus, error) {
-        _this.notifyObserver("loadFail", error);
-    });
+    var result = {
+        success:function(data) {
+         this.data = data;
+            this.notifyObserver("loadSucceed", data);
+        },
+        failure: function(jqxhr, textStatus, error) {
+            this.notifyObserver("loadFail", error);
+        }
+    };
+    $.getJSON(path).then(result.success.bind(this), result.failure.bind(this) );
 };
 
 /**
@@ -72,7 +74,6 @@ TimelinePlayer.prototype.play = function() {
     this.notifyObserver("playing");
 
     // check for currently paused
-    var _this = this;
     if ( this.pauseTime === null ) {
 
         // create text for display
@@ -96,7 +97,7 @@ TimelinePlayer.prototype.play = function() {
         // if not paused, set timer to play next event
         // (a pause could occur in the notifyObserver call above - as in testing)
         if ( this.pauseTime === null ) {
-            this.timer = setTimeout(function() { _this.play(); }, this.timeForCurrentEvent);
+            this.timer = setTimeout(this.play.bind(this), this.timeForCurrentEvent);
         }
 
     } else {
@@ -106,7 +107,7 @@ TimelinePlayer.prototype.play = function() {
         this.elapsedTime += (this.pauseTime - this.startTime);
         this.startTime = performance.now();
         this.pauseTime = null;
-        this.timer = setTimeout(function() { _this.play(); }, remainingTime);
+        this.timer = setTimeout(this.play.bind(this), remainingTime);
 
     }
 };
